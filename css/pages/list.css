@@ -107,5 +107,78 @@
 }
 .page-list .meta .errors .error {
     padding: 1rem;
+    background-color: var(--color-error);
+    color: var(--color-on-error);
+    border-radius: 0.5rem;
 }
-/* ... additional styles for list containers, cards, and pointercrate-style layouts omitted for brevity ... */
+.page-list .meta .editors {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.page-list .meta .editors li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.page-list .meta .editors li img {
+    height: 1.25rem;
+}
+.page-list .meta .editors li a:hover {
+    text-decoration: underline;
+}
+
+.pc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-right: 0.5rem;
+}
+.pc-card {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.6rem;
+    border-radius: 0.5rem;
+    background-color: var(--color-background-hover);
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.pc-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.pc-card.active {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-color: var(--color-primary);
+}
+.pc-card.error {
+    background-color: var(--color-error);
+    color: var(--color-on-error);
+}
+.pc-thumb {
+    width: 110px;
+    height: 62px;
+    object-fit: cover;
+    border-radius: 0.35rem;
+    flex-shrink: 0;
+}
+.pc-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+.pc-title {
+    margin: 0;
+    line-height: 1.2;
+}
+.pc-author {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    font-style: italic;
+}
+
