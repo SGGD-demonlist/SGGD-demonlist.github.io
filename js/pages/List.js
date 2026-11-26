@@ -22,19 +22,29 @@ export default {
         </main>
         <main v-else class="page-list">
             <div class="list-container">
-                <table class="list" v-if="list">
-                    <tr v-for="([level, err], i) in list">
-                        <td class="rank">
-                            <p v-if="i + 1 <= 150" class="type-label-lg">#{{ i + 1 }}</p>
-                            <p v-else class="type-label-lg">Legacy</p>
-                        </td>
-                        <td class="level" :class="{ 'active': selected == i, 'error': !level }">
-                            <button @click="selected = i">
-                                <span class="type-label-lg">{{ level?.name || \`Error (\${err}.json)\` }}</span>
-                            </button>
-                        </td>
-                    </tr>
-                </table>
+                <div class="list pc-list" v-if="list">
+                    <div
+                        v-for="([level, err], i) in list"
+                        :key="i"
+                        class="pc-card"
+                        :class="{ 'active': selected == i, 'error': !level }"
+                        @click="selected = i"
+                    >
+                        <img
+                            v-if="level && thumbnail(level.verification)"
+                            :src="thumbnail(level.verification)"
+                            class="pc-thumb"
+                            alt="Level thumbnail"
+                        />
+                        <div class="pc-info">
+                            <p class="pc-title type-label-lg">
+                                <span class="pc-rank">{{ i + 1 <= 150 ? '#' + (i + 1) : 'Legacy' }}</span>
+                                – {{ level?.name || \`Error (\${err}.json)\` }}
+                            </p>
+                            <p v-if="level" class="pc-author">published by {{ level.author }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="level-container">
                 <div class="level" v-if="level">
@@ -57,7 +67,7 @@ export default {
                     </ul>
                     <h2>Records</h2>
                     <p v-if="selected + 1 <= 75"><strong>{{ level.percentToQualify }}%</strong> or better to qualify</p>
-                    <p v-else-if="selected +1 <= 150"><strong>100%</strong> or better to qualify</p>
+                    <p v-else-if="selected + 1 <= 150"><strong>100%</strong> or better to qualify</p>
                     <p v-else>This level does not accept new records.</p>
                     <table class="records">
                         <tr v-for="record in level.records" class="record">
@@ -86,7 +96,7 @@ export default {
                         <p class="error" v-for="error of errors">{{ error }}</p>
                     </div>
                     <div class="og">
-                        <p class="type-label-md">Website layout made by <a href="https://tsl.pages.dev/" target="_blank">TheShittyList</a></p>
+                        <p class="type-label-md">Website layout made by <a href="https://pages.dev" target="_blank">TheShittyList</a></p>
                     </div>
                     <template v-if="editors">
                         <h3>List Editors</h3>
@@ -153,11 +163,9 @@ export default {
         },
     },
     async mounted() {
-        // Hide loading spinner
         this.list = await fetchList();
         this.editors = await fetchEditors();
 
-        // Error handling
         if (!this.list) {
             this.errors = [
                 "Failed to load list. Retry in a few minutes or notify list staff.",
@@ -180,5 +188,10 @@ export default {
     methods: {
         embed,
         score,
+        thumbnail(url) {
+            if (!url) return "";
+            const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            return match ? `https://youtube.com{match[1]}/mqdefault.jpg` : "";
+        },
     },
 };
