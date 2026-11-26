@@ -192,7 +192,7 @@ export default {
             if (!url) return "";
             const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             const id = match ? match.at(1) : "";
-            return id ? ["https:/", "img.you" + "tube." + "com", "vi", id, "mqdefault.jpg"].join("/") : "";
+            return id ? ["https:/", "img.you" + "tube." + "com", "vi", id, "mqdefault.jpg"].join("/"): ""; : "";
 
 
 
