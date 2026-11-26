@@ -20,98 +20,76 @@ export default {
         <main v-if="loading">
             <Spinner></Spinner>
         </main>
-        <main v-else class="pc-page">
-            <div class="pc-tabs">
-                <button :class="{ active: tab === 'main' && selected === null }" @click="selectTab('main')">Main List</button>
-                <button :class="{ active: tab === 'extended' && selected === null }" @click="selectTab('extended')">Extended List</button>
-                <button :class="{ active: tab === 'legacy' && selected === null }" @click="selectTab('legacy')">Legacy List</button>
+        <main v-else class="page-list">
+            <div class="list-container">
+                <table class="list" v-if="list">
+                    <tr v-for="([level, err], i) in list">
+                        <td class="rank">
+                            <p v-if="i + 1 <= 150" class="type-label-lg">#{{ i + 1 }}</p>
+                            <p v-else class="type-label-lg">Legacy</p>
+                        </td>
+                        <td class="level" :class="{ 'active': selected == i, 'error': !level }">
+                            <button @click="selected = i">
+                                <span class="type-label-lg">{{ level?.name || \`Error (\${err}.json)\` }}</span>
+                            </button>
+                        </td>
+                    </tr>
+                </table>
             </div>
-
-            <div class="pc-body">
-                <div class="pc-main-col">
-                    <div v-if="selected === null" class="pc-feed">
-                        <div class="pc-header-box">
-                            <h1>SGGD Demonlist</h1>
-                            <p class="pc-subtitle">The {{ tab }} list of the Demonlist with ranked hardest levels.</p>
-                            <div class="pc-search-wrap">
-                                <span class="pc-search-icon">🔍</span>
-                                <input
-                                    v-model="search"
-                                    type="text"
-                                    class="pc-search-input"
-                                    placeholder="Filter shown demons..."
-                                />
-                                <button v-if="search" class="pc-clear-btn" @click="search = ''" title="Clear">✕</button>
-                            </div>
-                        </div>
-
-                        <div
-                            v-for="item in filteredList"
-                            :key="item.rank"
-                            class="pc-big-card"
-                            :class="{ error: !item.level }"
-                            @click="item.level && (selected = item.rank - 1)"
-                        >
-                            <img
-                                v-if="item.level && thumbnail(item.level.verification)"
-                                :src="thumbnail(item.level.verification)"
-                                class="pc-big-thumb"
-                                alt="Thumbnail"
-                            />
-                            <div class="pc-big-info">
-                                <h2>#{{ item.rank }} – {{ item.level?.name || \`Error (\${item.err}.json)\` }}</h2>
-                                <p v-if="item.level" class="pc-pub">
-                                    published by <strong>{{ item.level.author }}</strong>, verified by <strong>{{ item.level.verifier }}</strong>
-                                </p>
-                                <p v-if="item.level && item.rank <= 150" class="pc-pts">
-                                    {{ score(item.rank, item.level.percentToQualify, item.level.percentToQualify) }} ({{ item.level.percentToQualify }}%) — {{ score(item.rank, 100, item.level.percentToQualify) }} (100%) points
-                                </p>
-                                <p v-else-if="item.level" class="pc-pts">Legacy List (0 points)</p>
-                            </div>
-                        </div>
-                        <p v-if="filteredList.length === 0" class="pc-empty">No matching levels found.</p>
-                    </div>
-
-                    <div v-else class="pc-detail-card">
-                        <button class="pc-back-btn" @click="selected = null">← Back to List</button>
-                        <div class="level" v-if="level">
-                            <h1>#{{ selected + 1 }} – {{ level.name }}</h1>
-                            <LevelAuthors :author="level.author" :creators="level.creators" :verifier="level.verifier"></LevelAuthors>
-                            <iframe class="video" id="videoframe" :src="video" frameborder="0"></iframe>
-                            <ul class="stats">
-                                <li>
-                                    <div class="type-title-sm">Points when completed</div>
-                                    <p>{{ score(selected + 1, 100, level.percentToQualify) }}</p>
-                                </li>
-                                <li>
-                                    <div class="type-title-sm">ID</div>
-                                    <p>{{ level.id }}</p>
-                                </li>
-                                <li>
-                                    <div class="type-title-sm">Password</div>
-                                    <p>{{ level.password || 'Free to Copy' }}</p>
-                                </li>
-                            </ul>
-                            <h2>Records</h2>
-                            <p v-if="selected + 1 <= 75"><strong>{{ level.percentToQualify }}%</strong> or better to qualify</p>
-                            <p v-else-if="selected + 1 <= 150"><strong>100%</strong> or better to qualify</p>
-                            <p v-else>This level does not accept new records.</p>
-                            <table class="records">
-                                <tr v-for="record in level.records" class="record">
-                                    <td class="percent"><p>{{ record.percent }}%</p></td>
-                                    <td class="user"><a :href="record.link" target="_blank" class="type-label-lg">{{ record.user }}</a></td>
-                                    <td class="mobile"><img v-if="record.mobile" :src="\`/assets/phone-landscape\${store.dark ? '-dark' : ''}.svg\`" alt="Mobile"></td>
-                                    <td class="hz"><p>{{ record.hz }}Hz</p></td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
+            <div class="level-container">
+                <div class="level" v-if="level">
+                    <h1>{{ level.name }}</h1>
+                    <LevelAuthors :author="level.author" :creators="level.creators" :verifier="level.verifier"></LevelAuthors>
+                    <iframe class="video" id="videoframe" :src="video" frameborder="0"></iframe>
+                    <ul class="stats">
+                        <li>
+                            <div class="type-title-sm">Points when completed</div>
+                            <p>{{ score(selected + 1, 100, level.percentToQualify) }}</p>
+                        </li>
+                        <li>
+                            <div class="type-title-sm">ID</div>
+                            <p>{{ level.id }}</p>
+                        </li>
+                        <li>
+                            <div class="type-title-sm">Password</div>
+                            <p>{{ level.password || 'Free to Copy' }}</p>
+                        </li>
+                    </ul>
+                    <h2>Records</h2>
+                    <p v-if="selected + 1 <= 75"><strong>{{ level.percentToQualify }}%</strong> or better to qualify</p>
+                    <p v-else-if="selected +1 <= 150"><strong>100%</strong> or better to qualify</p>
+                    <p v-else>This level does not accept new records.</p>
+                    <table class="records">
+                        <tr v-for="record in level.records" class="record">
+                            <td class="percent">
+                                <p>{{ record.percent }}%</p>
+                            </td>
+                            <td class="user">
+                                <a :href="record.link" target="_blank" class="type-label-lg">{{ record.user }}</a>
+                            </td>
+                            <td class="mobile">
+                                <img v-if="record.mobile" :src="\`/assets/phone-landscape\${store.dark ? '-dark' : ''}.svg\`" alt="Mobile">
+                            </td>
+                            <td class="hz">
+                                <p>{{ record.hz }}Hz</p>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-
-                <aside class="pc-sidebar">
-                    <div class="pc-side-box" v-if="editors">
+                <div v-else class="level" style="height: 100%; justify-content: center; align-items: center;">
+                    <p>(ノಠ益ಠ)ノ彡┻━┻</p>
+                </div>
+            </div>
+            <div class="meta-container">
+                <div class="meta">
+                    <div class="errors" v-show="errors.length > 0">
+                        <p class="error" v-for="error of errors">{{ error }}</p>
+                    </div>
+                    <div class="og">
+                        <p class="type-label-md">Website layout made by <a href="https://tsl.pages.dev/" target="_blank">TheShittyList</a></p>
+                    </div>
+                    <template v-if="editors">
                         <h3>List Editors</h3>
-                        <p class="pc-side-note">Contact any of these people if you have problems with the list or want to see a specific thing changed.</p>
                         <ol class="editors">
                             <li v-for="editor in editors">
                                 <img :src="\`/assets/\${roleIconMap[editor.role]}\${store.dark ? '-dark' : ''}.svg\`" :alt="editor.role">
@@ -119,18 +97,33 @@ export default {
                                 <p v-else>{{ editor.name }}</p>
                             </li>
                         </ol>
-                    </div>
-                    <div class="pc-side-box">
-                        <h3>Submission Requirements</h3>
-                        <p>Achieved the record without using hacks (however, FPS bypass is allowed, up to 360fps)</p>
-                        <p>Achieved the record on the level that is listed on the site - please check the level ID before you submit a record</p>
-                        <p>Have either source audio or clicks/taps in the video. Edited audio only does not count</p>
-                        <p>The recording must have a previous attempt and entire death animation shown before the completion, unless the completion is on the first attempt.</p>
-                        <p>The recording must also show the player hit the endwall, or the completion will be invalidated.</p>
-                        <p>Do not use secret routes or bug routes</p>
-                        <p>Do not use easy modes, only a record of the unmodified level qualifies</p>
-                    </div>
-                </aside>
+                    </template>
+                    <h3>Submission Requirements</h3>
+                    <p>
+                        Achieved the record without using hacks (however, FPS bypass is allowed, up to 360fps)
+                    </p>
+                    <p>
+                        Achieved the record on the level that is listed on the site - please check the level ID before you submit a record
+                    </p>
+                    <p>
+                        Have either source audio or clicks/taps in the video. Edited audio only does not count
+                    </p>
+                    <p>
+                        The recording must have a previous attempt and entire death animation shown before the completion, unless the completion is on the first attempt. Everyplay records are exempt from this
+                    </p>
+                    <p>
+                        The recording must also show the player hit the endwall, or the completion will be invalidated.
+                    </p>
+                    <p>
+                        Do not use secret routes or bug routes
+                    </p>
+                    <p>
+                        Do not use easy modes, only a record of the unmodified level qualifies
+                    </p>
+                    <p>
+                        Once a level falls onto the Legacy List, we accept records for it for 24 hours after it falls off, then afterwards we never accept records for said level
+                    </p>
+                </div>
             </div>
         </main>
     `,
@@ -138,57 +131,54 @@ export default {
         list: [],
         editors: [],
         loading: true,
-        selected: null,
-        tab: "main",
-        search: "",
+        selected: 0,
         errors: [],
         roleIconMap,
         store
     }),
     computed: {
-        filteredList() {
-            const q = this.search.trim().toLowerCase();
-            return this.list
-                .map(([level, err], i) => ({ level, err, rank: i + 1 }))
-                .filter((item) => {
-                    if (this.tab === "main" && item.rank > 75) return false;
-                    if (this.tab === "extended" && (item.rank <= 75 || item.rank > 150)) return false;
-                    if (this.tab === "legacy" && item.rank <= 150) return false;
-                    if (!q || !item.level) return true;
-                    return (
-                        item.level.name.toLowerCase().includes(q) ||
-                        item.level.author.toLowerCase().includes(q) ||
-                        item.level.verifier.toLowerCase().includes(q)
-                    );
-                });
-        },
         level() {
-            return this.selected !== null ? this.list.at(this.selected)?.at(0) : null;
+            return this.list[this.selected][0];
         },
         video() {
             if (!this.level.showcase) {
                 return embed(this.level.verification);
             }
-            return embed(this.toggledShowcase ? this.level.showcase : this.level.verification);
+
+            return embed(
+                this.toggledShowcase
+                    ? this.level.showcase
+                    : this.level.verification
+            );
         },
     },
     async mounted() {
+        // Hide loading spinner
         this.list = await fetchList();
         this.editors = await fetchEditors();
+
+        // Error handling
+        if (!this.list) {
+            this.errors = [
+                "Failed to load list. Retry in a few minutes or notify list staff.",
+            ];
+        } else {
+            this.errors.push(
+                ...this.list
+                    .filter(([_, err]) => err)
+                    .map(([_, err]) => {
+                        return `Failed to load level. (${err}.json)`;
+                    })
+            );
+            if (!this.editors) {
+                this.errors.push("Failed to load list editors.");
+            }
+        }
+
         this.loading = false;
     },
     methods: {
         embed,
         score,
-        selectTab(t) {
-            this.tab = t;
-            this.selected = null;
-        },
-        thumbnail(url) {
-            if (!url) return "";
-            const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            const id = match ? match.at(1) : "";
-            return id ? ["https:/", "img.you" + "tube." + "com", "vi", id, "mqdefault.jpg"].join("/") : "";
-        },
     },
 };
