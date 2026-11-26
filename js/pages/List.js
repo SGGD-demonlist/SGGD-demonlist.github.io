@@ -30,6 +30,21 @@ export default {
             <div class="pc-body">
                 <div class="pc-main-col">
                     <div v-if="selected === null" class="pc-feed">
+                        <div class="pc-header-box">
+                            <h1>SGGD Demonlist</h1>
+                            <p class="pc-subtitle">The {{ tab }} list of the Demonlist with ranked hardest levels.</p>
+                            <div class="pc-search-wrap">
+                                <span class="pc-search-icon">🔍</span>
+                                <input
+                                    v-model="search"
+                                    type="text"
+                                    class="pc-search-input"
+                                    placeholder="Filter shown demons..."
+                                />
+                                <button v-if="search" class="pc-clear-btn" @click="search = ''" title="Clear">✕</button>
+                            </div>
+                        </div>
+
                         <div
                             v-for="item in filteredList"
                             :key="item.rank"
@@ -45,14 +60,16 @@ export default {
                             />
                             <div class="pc-big-info">
                                 <h2>#{{ item.rank }} – {{ item.level?.name || \`Error (\${item.err}.json)\` }}</h2>
-                                <p v-if="item.level" class="pc-pub">published by {{ item.level.author }}</p>
+                                <p v-if="item.level" class="pc-pub">
+                                    published by <strong>{{ item.level.author }}</strong>, verified by <strong>{{ item.level.verifier }}</strong>
+                                </p>
                                 <p v-if="item.level && item.rank <= 150" class="pc-pts">
                                     {{ score(item.rank, item.level.percentToQualify, item.level.percentToQualify) }} ({{ item.level.percentToQualify }}%) — {{ score(item.rank, 100, item.level.percentToQualify) }} (100%) points
                                 </p>
                                 <p v-else-if="item.level" class="pc-pts">Legacy List (0 points)</p>
                             </div>
                         </div>
-                        <p v-if="filteredList.length === 0" class="pc-empty">No levels in this section yet.</p>
+                        <p v-if="filteredList.length === 0" class="pc-empty">No matching levels found.</p>
                     </div>
 
                     <div v-else class="pc-detail-card">
@@ -123,18 +140,26 @@ export default {
         loading: true,
         selected: null,
         tab: "main",
+        search: "",
         errors: [],
         roleIconMap,
         store
     }),
     computed: {
         filteredList() {
+            const q = this.search.trim().toLowerCase();
             return this.list
                 .map(([level, err], i) => ({ level, err, rank: i + 1 }))
                 .filter((item) => {
-                    if (this.tab === "main") return item.rank <= 75;
-                    if (this.tab === "extended") return item.rank > 75 && item.rank <= 150;
-                    return item.rank > 150;
+                    if (this.tab === "main" && item.rank > 75) return false;
+                    if (this.tab === "extended" && (item.rank <= 75 || item.rank > 150)) return false;
+                    if (this.tab === "legacy" && item.rank <= 150) return false;
+                    if (!q || !item.level) return true;
+                    return (
+                        item.level.name.toLowerCase().includes(q) ||
+                        item.level.author.toLowerCase().includes(q) ||
+                        item.level.verifier.toLowerCase().includes(q)
+                    );
                 });
         },
         level() {
@@ -162,8 +187,3 @@ export default {
         thumbnail(url) {
             if (!url) return "";
             const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            const id = match ? match.at(1) : "";
-            return id ? ["https:/", "img.you" + "tube." + "com", "vi", id, "mqdefault.jpg"].join("/") : "";
-        },
-    },
-};
