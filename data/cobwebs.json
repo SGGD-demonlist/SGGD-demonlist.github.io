@@ -1,0 +1,16 @@
+{
+    "name": "cobwebs",
+    "author": "ninedice",
+    "creator": ["ninedice"],
+    "verifier": "Vanness",
+    "verification": "https://www.youtube.com/watch?v=IMoKNvBQeFE",
+    "percentToQualify": 70
+    "records":[
+        {
+            "user": "im_the_van",
+            "link": "https://www.youtube.com/watch?v=IMoKNvBQeFE"
+            "percent": 100,
+            "hz": 240
+        }
+    ]
+}
