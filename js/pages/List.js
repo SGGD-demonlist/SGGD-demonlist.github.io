@@ -148,7 +148,7 @@ export default {
     }),
     computed: {
         level() {
-            return this.list[this.selected][0];
+            return this.list.at(this.selected)?.at(0);
         },
         video() {
             if (!this.level.showcase) {
@@ -191,7 +191,8 @@ export default {
         thumbnail(url) {
             if (!url) return "";
             const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            return match ? `https://youtube.com{match[1]}/mqdefault.jpg` : "";
+            const id = match ? match.at(1) : "";
+            return id ? "https://youtube.com" + id + "/mqdefault.jpg" : "";
         },
     },
 };
